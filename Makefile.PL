@@ -1,8 +1,16 @@
 use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
 WriteMakefile(
-    'NAME'	=> 'File::Backup',
-    'VERSION_FROM' => 'Backup.pm', # finds $VERSION
-    'dist' => { COMPRESS=>"gzip", SUFFIX=>"gz" },
+    NAME         => 'File::Backup',
+    VERSION_FROM => 'lib/File/Backup.pm',
+    PREREQ_PM    => {
+        'Test::More'  => 0,
+        'Carp'        => 0,
+        'Cwd'         => 0,
+        'File::Which' => 0,
+    },
+    ($] >= 5.005
+        ? (ABSTRACT_FROM => 'lib/File/Backup.pm',
+           AUTHOR        => 'Gene Boggs <gene@cpan.org>')
+        : ()
+    ),
 );

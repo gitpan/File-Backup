@@ -1,46 +1,22 @@
-SYNOPSIS
+File::Backup distribution
+=========================
 
-  use File::Backup("backup");
-  backup(
-     from          => "/dir/to/back/up",
-     to            => "/destination/of/backup/files",
-     torootname    => root name of backup file (default is ""),
-     keep          => number of backups to keep in todir (default is 7),
-     tar           => path to archiving utility (default is "/usr/bin/tar"),
-     compress => path to compressing utility (default is "/usr/bin/gzip"),
-     tarflags      => flags to pass to 'tar' (default is "-cf"),
-     compressflags => flags to pass to 'cmpr' (default is ""),
-     tarsuffix     => suffix to put on the tarfile (default is '.tar'),
-  );
+INSTALLATION
 
-DESCRIPTION
+To install this module type the following:
 
-This module implements a very simple backup scheme.  In its barest form, it
-takes as input a source directory and a destination directory, and puts a
-backup of the source directory in the destination directory.  You may
-specify a maximum number of backups to keep in the directory (the 'keep'
-parameter).  By setting the 'keep' parameter to n, you will keep the n most
-recent backups.  Specify -1 to keep all backups.
+   perl Makefile.PL
+   make
+   make test
+   make install
 
-The backup will include a date string (of the format YYYY-MM-DD-hh:mm::ss)
-that will be used to figure out which files are the most recent.  You can
-also give a string that will be used as the beginning of the backup's
-filename (before the date string), which may be useful if you're keeping
-backups of several different things in the same directory.
+DEPENDENCIES
 
-AUTHOR
+None yet.
 
-Ken Williams (ken@forum.swarthmore.edu)
+COPYRIGHT AND LICENCE
 
+Copyright (C) 1998-2003 Ken Williams and Gene Boggs
 
-
-Revision history for Perl extension File::Backup.
-
-0.02  Thu Dec  3 00:28:02 EST 1998
-   - Changed the date string format from YYYY-MM-DD-hh:mm:ss to
-     YYYY-MM-DD_hh-mm-ss, because the colons seem to cause problems with
-     the GNU version of tar.
-
-0.01  Wed Dec  2 20:48:15 1998
-	- original version; created by h2xs 1.18
-
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 

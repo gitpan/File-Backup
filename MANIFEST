@@ -1,5 +1,11 @@
-Backup.pm
-MANIFEST
+CHANGES
+from_dir/1
+from_dir/2
+from_dir/3
+lib/File/Backup.pm
 Makefile.PL
+MANIFEST			This list of files
+MANIFEST.SKIP
 README
-test.pl
+t/File-Backup.t
+META.yml                                Module meta-data (added by MakeMaker)

@@ -1,0 +1,22 @@
+Changes file for File::Backup
+
+0.03 Tue Sep  9 19:19:24 2003
+    - Recreated by Module::Husbandry on Gene's local system.
+    - Added comprehensive documentation, including a "wishlist" in
+      the TODO section.
+    - Added generic aliases for the tar and gzip specific parameters.
+    - Made backup() only archive if asked to (which is the default).
+    - Added File::Which to detect where the local tar and gzip
+      executables live.
+    - Added all kinds of croaks and conditional execution statements.
+    - Added an optional debug parameter flag and mass _debug() calls.
+    - Added YMDhms format string to RE and printf conversion functions.
+    - Default the from and to directories to Cwd::cwd.
+
+0.02  Thu Dec  3 00:28:02 EST 1998
+   - Changed the date string format from YYYY-MM-DD-hh:mm:ss to
+     YYYY-MM-DD_hh-mm-ss, because the colons seem to cause problems with
+     the GNU version of tar.
+
+0.01  Wed Dec  2 20:48:15 1998
+    - original version; created by h2xs 1.18
