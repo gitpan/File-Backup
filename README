@@ -12,7 +12,7 @@ To install this module type the following:
 
 DEPENDENCIES
 
-None yet.
+Cwd, File::Which, LockFile::Simple
 
 COPYRIGHT AND LICENCE
 

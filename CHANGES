@@ -1,5 +1,12 @@
 Changes file for File::Backup
 
+0.06  Thu Sep 18 2003
+    - Implemented file locking for the "from directory" source files.
+    - Added skip blocks for people (like certain cpantesters) who do
+      not have the tar or gzip files.
+    - Updated POD accordingly.
+    - Indented _debug() calls.
+
 0.05  Tue Sep 16 2003
     - Ha!  DrMath++  Try "scalar which()".  Take that "Josts
       Smokehouse"!!

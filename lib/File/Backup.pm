@@ -1,4 +1,4 @@
-# $Id: Backup.pm,v 1.15 2003/09/16 15:42:10 gene Exp $
+# $Id: Backup.pm,v 1.21 2003/09/22 00:58:19 gene Exp $
 
 package File::Backup;
 
@@ -7,10 +7,11 @@ use Carp;
 use vars qw($VERSION @EXPORT_OK @EXPORT);
 use base qw(Exporter);
 @EXPORT = @EXPORT_OK = qw(backup);
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 use Cwd;
 use File::Which;
+use LockFile::Simple qw(lock unlock);
 
 sub backup {  # {{{
     # Function parameters:   {{{
@@ -65,9 +66,9 @@ sub backup {  # {{{
     croak "Compressor executable not found. Ouch.\n"
         if $o{compress} && !$o{compressor};
 
-#_debug("Parameters:\n", map { "$_: $o{$_}\n" } keys %o) if $o{debug};
-_debug('From directory ', -d $o{from} ? 'exists' : 'does not exist') if $o{debug};
-_debug('To directory ',   -d $o{to}   ? 'exists' : 'does not exist') if $o{debug};
+#    _debug("Parameters:\n", map { "$_: $o{$_}\n" } keys %o) if $o{debug};
+    _debug('From directory ', -d $o{from} ? 'exists' : 'does not exist') if $o{debug};
+    _debug('To directory ',   -d $o{to}   ? 'exists' : 'does not exist') if $o{debug};
 
     # The files that have been backed up.
     my %backed_files = ();
@@ -84,24 +85,48 @@ _debug('To directory ',   -d $o{to}   ? 'exists' : 'does not exist') if $o{debug
         use_gmtime => $o{use_gmtime},
     );
     $dest .= "$o{suffix}" if $o{suffix};
-#_debug("Archive file to make: $dest") if $o{debug};
+#    _debug("Archive file to make: $dest") if $o{debug};
 
-    if ($o{archive}) {  # {{{
+    if ($o{archive} && $dest) {  # {{{
         # Package up the file
         my @command = ($o{archiver}, $o{archive_flags}, $dest, $o{from});
-_debug('Archive command: ', join ' ', @command) if $o{debug};
+        _debug('Archive command: ', join ' ', @command) if $o{debug};
+
+        # Lock each file in the from directory.
+        opendir FROM, $o{from} or
+            croak "Can't open directory $o{from}: $!\n";
+        _debug("Locking files in $o{from}") if $o{debug};
+        for (grep { !-d } readdir FROM) {
+            my $file = "$o{from}/$_";
+            _debug("Locking $file") if $o{debug};
+            lock("$file") or croak "Can't lock $file\n";
+        }
+        closedir FROM or croak "Can't close directory $o{from}: $!\n";
+
+        # Execute the archive command.
         croak "Error executing archive command: $!"
             unless system(@command) == 0 && -e $dest;
-_debug("Made archive file: $dest") if $o{debug};
+        _debug("Made archive file: $dest") if $o{debug};
+
+        opendir FROM, $o{from} or
+            croak "Can't open directory $o{from}: $!\n";
+        # unlock each non-lock file in the from directory.
+        for (grep { !-d && !/\.lock$/ } readdir FROM) {
+            my $file = "$o{from}/$_";
+            unlock($file) or croak "Can't unlock $file\n";
+            _debug("Unlocked $file") if $o{debug};
+        }
+        _debug("Unlocked files in $o{from}.") if $o{debug};
+        closedir FROM or croak "Can't close directory $o{from}: $!\n";
 
         # Compress the file
         if ($o{compressor} and $o{compress}) {
             @command = ($o{compressor}, $o{compress_flags}, $dest);
             $dest .= '.gz';
-_debug('Compression command: ', join ' ', @command) if $o{debug};
+            _debug('Compression command: ', join ' ', @command) if $o{debug};
             croak "Error executing compression command: $!"
                 unless system(join ' ', @command) == 0 && -e $dest;
-_debug("Made compressed file: $dest") if $o{debug};
+            _debug("Made compressed file: $dest") if $o{debug};
         }
 
         # Log the archive name.
@@ -111,7 +136,7 @@ _debug("Made compressed file: $dest") if $o{debug};
         # Rotate ("only keep the latest") backups if keep is not
         # negative.
         if ($o{keep} >= 0) {  # {{{
-_debug("Proceed to rotate with $o{keep} max in '$o{timeformat}' format.") if $o{debug};
+            _debug("Proceed to rotate with $o{keep} max in '$o{timeformat}' format.") if $o{debug};
             # Open the destination directory.
             local *DIR;
             opendir (DIR, $o{to}) or croak "Can't open $o{to}: $!\n";
@@ -122,7 +147,7 @@ _debug("Proceed to rotate with $o{keep} max in '$o{timeformat}' format.") if $o{
             # Grab the names of all the existing backup files.
             my @files;
             while (my $file = readdir DIR) {
-#_debug("Saw $file") if $o{debug};
+#                _debug("Saw $file") if $o{debug};
                 if ($file =~
                     /^               # Start
                      \Q$o{prefix}\E  # Prefix
@@ -130,7 +155,7 @@ _debug("Proceed to rotate with $o{keep} max in '$o{timeformat}' format.") if $o{
                      \Q$o{suffix}\E  # Suffix
                     /x
                 ) {
-_debug("Existing backup file: $file") if $o{debug};
+                    _debug("Existing backup file: $file") if $o{debug};
                     push @files, $file;
                 }
             }
@@ -141,10 +166,10 @@ _debug("Existing backup file: $file") if $o{debug};
             # Keep a finite number of backup files unless the keep flag
             # is set to a negative number.
             if ((@files > $o{keep}) and ($o{keep} >= 0)) {
-_debug(scalar @files . " > $o{keep} and $o{keep} >= 0") if $o{debug};
+                _debug(scalar @files . " > $o{keep} and $o{keep} >= 0") if $o{debug};
                 @files = (reverse sort @files)[$o{keep} .. $#files];
                 for my $file (@files) {
-_debug("Unlinking $o{to}/$file") if $o{debug};
+                    _debug("Unlinking $o{to}/$file") if $o{debug};
                     unlink("$o{to}/$file") or
                         carp "Couldn't unlink $file: $!";
                 }
@@ -227,7 +252,7 @@ File::Backup - Easy file backup & rotation automation
 =head1 DESCRIPTION
 
 This module implements archival and compression (A.K.A "backup") 
-schemes.
+schemes with automatic source file locking.
 
 * Currently, this is only tar and gzip with Unix path strings.  Maybe 
 your computer is okay with that... Cross platform file backing is
@@ -466,6 +491,8 @@ Use other archivers and compressiors not covered by perl modules.
 
 Do the same for compression, of course (e.g. C<Compress::Zlib>, etc).
 
+Backup to database with record locking.
+
 Descend into directories with C<File::Find>.
 
 Use standard ISO formats for the C<time2str> function.
@@ -497,6 +524,11 @@ nicely.
 L<Cwd>
 
 L<File::Which>
+
+=head1 THANK YOU
+
+Help, insight, suggestions and comments came from Ken Williams
+(A.K.A. DrMath) and Joshua Keroes (A.K.A. ua).
 
 =head1 AUTHORS
 
