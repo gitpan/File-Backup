@@ -1,5 +1,10 @@
 Changes file for File::Backup
 
+0.05  Tue Sep 16 2003
+    - Ha!  DrMath++  Try "scalar which()".  Take that "Josts
+      Smokehouse"!!
+    - Fixed misleading POD.
+
 0.04  Mon Sep 15 2003
     - Renamed the compression arg to compress and handled the
       backward compat issue that then sprang forth.

@@ -1,4 +1,4 @@
-# $Id: Backup.pm,v 1.13 2003/09/16 04:03:27 gene Exp $
+# $Id: Backup.pm,v 1.15 2003/09/16 15:42:10 gene Exp $
 
 package File::Backup;
 
@@ -7,7 +7,7 @@ use Carp;
 use vars qw($VERSION @EXPORT_OK @EXPORT);
 use base qw(Exporter);
 @EXPORT = @EXPORT_OK = qw(backup);
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 use Cwd;
 use File::Which;
@@ -35,12 +35,12 @@ sub backup {  # {{{
         use_gmtime => 0,  # Use the system localtime not gmtime.
 
         archive => 1,  # We want to tar/gz/zip our backups.
-        archiver => which('tar'),  # The achiving program.
+        archiver => scalar which('tar'),  # The achiving program.
         archive_flags => '-cf',  # Archive switches.
         prefix => '',      # Archive prefix.
         suffix => '.tar',  # Archive suffix.
 
-        compressor => which('gzip'),  # Local gzip location.
+        compressor => scalar which('gzip'),  # Local gzip location.
         compress_flags => '',  # Compression switches.
         compress => 1,  # Compression on or off.
 
@@ -51,7 +51,7 @@ sub backup {  # {{{
 
     # And now for the legacy API backward compatibility:
     # If the compress arg is not numeric, it is probably the name of
-    # the compression program that the called wants to use.
+    # the compression program that the caller wants to use.
     if ($o{compress} !~ /^\d$/) {
         $o{compressor} = $o{compress};
         $o{compress} = 1;
@@ -323,7 +323,7 @@ Flag to archive (with tar/gz/zip) the backed-up files.  Default 1.
 
 =item * archiver => $PATH_TO_PROGRAM
 
-The achiving program.  Default C<'/usr/bin/tar'>.
+The achiving program.  Default is your local tar.
 
 =item * archive_flags => $COMMAND_SWITCHES
 
@@ -344,7 +344,7 @@ C<'.tar'>.
 
 =item * compressor => $PATH_TO_PROGRAM
 
-The compression program.  Default C<'/usr/bin/gzip'>.
+The compression program.  Default is your local gzip.
 
 =item * compress_flags => $COMMAND_SWITCHES
 
@@ -443,18 +443,10 @@ contiguous YMDhms format characters.
 
 =back
 
-=head1 EXAMPLES
-
-  # On the commandline:
-  back -s -x "^\." -i ".*"
-
-That is, show the number and names of files to be backed, include all
-"dot files", but exclude files of one character.
-
 =head1 BUGS
 
 You can't make two backups of the same stuff in one second, because 
-they'll try to have the same name.
+they'll try to have the same name.  Is this really a bug?
 
 =head1 TO DO
 
