@@ -1,4 +1,4 @@
-# $Id: Backup.pm,v 1.8 2003/09/11 16:26:17 gene Exp $
+# $Id: Backup.pm,v 1.13 2003/09/16 04:03:27 gene Exp $
 
 package File::Backup;
 
@@ -7,7 +7,7 @@ use Carp;
 use vars qw($VERSION @EXPORT_OK @EXPORT);
 use base qw(Exporter);
 @EXPORT = @EXPORT_OK = qw(backup);
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 use Cwd;
 use File::Which;
@@ -42,7 +42,7 @@ sub backup {  # {{{
 
         compressor => which('gzip'),  # Local gzip location.
         compress_flags => '',  # Compression switches.
-        compression => 1,  # Compression on or off.
+        compress => 1,  # Compression on or off.
 
         # Idiomatic "catch-all" for passing alternate parameters or
         # redefining default ones.
@@ -50,9 +50,20 @@ sub backup {  # {{{
     );
 
     # And now for the legacy API backward compatibility:
-    @o{qw(tar tarflags torootname tarsuffix compress compressflags)} = 
-    @o{qw(archiver archive_flags prefix suffix compressor compress_flags)};
+    # If the compress arg is not numeric, it is probably the name of
+    # the compression program that the called wants to use.
+    if ($o{compress} !~ /^\d$/) {
+        $o{compressor} = $o{compress};
+        $o{compress} = 1;
+    }
+    @o{qw(tar      tarflags      torootname tarsuffix compressflags)} = 
+    @o{qw(archiver archive_flags prefix     suffix    compress_flags)};
     # }}}
+
+    croak "Archiver executable not found. Ouch.\n"
+        if $o{archive} && !$o{archiver};
+    croak "Compressor executable not found. Ouch.\n"
+        if $o{compress} && !$o{compressor};
 
 #_debug("Parameters:\n", map { "$_: $o{$_}\n" } keys %o) if $o{debug};
 _debug('From directory ', -d $o{from} ? 'exists' : 'does not exist') if $o{debug};
@@ -65,35 +76,32 @@ _debug('To directory ',   -d $o{to}   ? 'exists' : 'does not exist') if $o{debug
     # XXX Oof. OS dependency.
     $o{to} =~ s#/$##;
 
-    if ($o{archive}) {  # {{{
-        # Stitch together the name of the archive file.
-        my $dest = "$o{to}/";
-        $dest .= $o{prefix} if $o{prefix};
-        $dest .= _time_to_string(
-            format => $o{timeformat},
-            use_gmtime => $o{use_gmtime},
-        );
-        $dest .= "$o{suffix}" if $o{suffix};
-_debug("Archive file: $dest") if $o{debug};
+    # Stitch together the name of the archive file.
+    my $dest = "$o{to}/";
+    $dest .= $o{prefix} if $o{prefix};
+    $dest .= _time_to_string(
+        format => $o{timeformat},
+        use_gmtime => $o{use_gmtime},
+    );
+    $dest .= "$o{suffix}" if $o{suffix};
+#_debug("Archive file to make: $dest") if $o{debug};
 
+    if ($o{archive}) {  # {{{
         # Package up the file
-        my $arch_cmd = "$o{archiver} $o{archive_flags} $dest $o{from}";
-        croak "Can't find your archiver executable.\n"
-            unless -e $o{archiver};
-_debug("Archive command: $arch_cmd") if $o{debug};
+        my @command = ($o{archiver}, $o{archive_flags}, $dest, $o{from});
+_debug('Archive command: ', join ' ', @command) if $o{debug};
         croak "Error executing archive command: $!"
-            unless system($arch_cmd) == 0;
+            unless system(@command) == 0 && -e $dest;
+_debug("Made archive file: $dest") if $o{debug};
 
         # Compress the file
-        if ($o{compressor} and $o{compression}) {
-            croak "Can't find your compressor executable.\n"
-                unless -e $o{compressor};
-            my $comp_cmd = "$o{compressor} $o{compress_flags} $dest";
-_debug("Compression command: $comp_cmd") if $o{debug};
-            croak "Error executing compression command: $!"
-                unless system($comp_cmd) == 0;
+        if ($o{compressor} and $o{compress}) {
+            @command = ($o{compressor}, $o{compress_flags}, $dest);
             $dest .= '.gz';
-_debug("Compressed archive file: $dest") if $o{debug};
+_debug('Compression command: ', join ' ', @command) if $o{debug};
+            croak "Error executing compression command: $!"
+                unless system(join ' ', @command) == 0 && -e $dest;
+_debug("Made compressed file: $dest") if $o{debug};
         }
 
         # Log the archive name.
@@ -103,7 +111,7 @@ _debug("Compressed archive file: $dest") if $o{debug};
         # Rotate ("only keep the latest") backups if keep is not
         # negative.
         if ($o{keep} >= 0) {  # {{{
-_debug("Proceed to rotate with $o{keep} max and $o{timeregexp}.") if $o{debug};
+_debug("Proceed to rotate with $o{keep} max in '$o{timeformat}' format.") if $o{debug};
             # Open the destination directory.
             local *DIR;
             opendir (DIR, $o{to}) or croak "Can't open $o{to}: $!\n";
@@ -203,7 +211,7 @@ __END__
 
 =head1 NAME
 
-File::Backup - Archive files and directories
+File::Backup - Easy file backup & rotation automation
 
 =head1 SYNOPSIS
 
@@ -342,7 +350,7 @@ The compression program.  Default C<'/usr/bin/gzip'>.
 
 The optional compression switches.
 
-=item * compression => 0 | 1
+=item * compress => 0 | 1
 
 Flag to turn archive compression off or on.
 
@@ -461,6 +469,8 @@ Make a friendly commandline function using a C<Getopt::*> module.
 Use C<File::Spec> or C<Class::Path> to build OS aware backup strings.
 
 Use C<Archive::Any/File/Tar/Zip> instead of Unix system calls.
+
+Use other archivers and compressiors not covered by perl modules.
 
 Do the same for compression, of course (e.g. C<Compress::Zlib>, etc).
 

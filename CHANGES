@@ -1,6 +1,23 @@
 Changes file for File::Backup
 
-0.03 Tue Sep  9 19:19:24 2003
+0.04  Mon Sep 15 2003
+    - Renamed the compression arg to compress and handled the
+      backward compat issue that then sprang forth.
+    - Moved creation of the destination filename outside the archive
+      condition.
+    - Combined the system and existence calls for archival and
+      compression.
+    - Fixed a semantic bug with timeformat replacing timeregexp.
+    - Added a test for no compression backup.
+
+0.03_1  Sat Sep 13 2003
+    - Yikes.  The installation process fails tests and leaves
+      META.yml behind.  Oops!  Sorry Ken.  : \
+    - Croak right away if no archive or compression executable.
+    - Make the system call not fork a shell process.
+    - Flip on the debug switch in the test suite...
+
+0.03  Tue Sep  9 19:19:24 2003
     - Recreated by Module::Husbandry on Gene's local system.
     - Added comprehensive documentation, including a "wishlist" in
       the TODO section.
