@@ -36,6 +36,11 @@ Ken Williams (ken@forum.swarthmore.edu)
 
 Revision history for Perl extension File::Backup.
 
+0.02  Thu Dec  3 00:28:02 EST 1998
+   - Changed the date string format from YYYY-MM-DD-hh:mm:ss to
+     YYYY-MM-DD_hh-mm-ss, because the colons seem to cause problems with
+     the GNU version of tar.
+
 0.01  Wed Dec  2 20:48:15 1998
 	- original version; created by h2xs 1.18
 

@@ -5,12 +5,12 @@ use vars qw($VERSION @ISA @EXPORT_OK);
 use Exporter;
 @ISA = qw(Exporter);
 @EXPORT_OK = ('backup');
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 sub backup {
     my %o = (
         'keep' => 7,
-        'tar'  => '/usr/bin/tar',
+        'tar'  => '/bin/tar',
         'compress' => '/usr/bin/gzip',
         'tarflags' => '-cf',
         'compressflags' => '',
@@ -43,7 +43,7 @@ sub backup {
     while (defined ($bfile = readdir DIR)) {
         push @extant, $bfile if $bfile =~ 
             /^\Q$o{torootname}\E                # Root part
-              \d\d\d\d-\d\d-\d\d-\d\d:\d\d:\d\d # Date part
+              \d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d # Date part
               \Q$o{tarsuffix}\E                 # Suffix part
             /x;
     }
@@ -62,7 +62,7 @@ sub time2str {
     foreach (\($sec,$min,$hr,$dy,$mo)) {
         $$_ = "0$$_" if length($$_) == 1;
     }
-    return "$yr-$mo-$dy-$hr:$min:$sec";
+    return "$yr-$mo-${dy}_$hr-$min-$sec";
 }
 
 
@@ -97,7 +97,7 @@ of backups to keep in the directory (the 'keep' parameter).  By setting the 'kee
 parameter to n, you will keep the n most recent backups.  Specify -1 to keep all
 backups.
 
-The backup will include a date string (of the format YYYY-MM-DD-hh:mm::ss) that
+The backup will include a date string (of the format YYYY-MM-DD_hh-mm-ss) that
 will be used to figure out which files are the most recent.  You can also give
 a string that will be used as the beginning of the backup's filename (before the
 date string), which may be useful if you're keeping backups of several different
