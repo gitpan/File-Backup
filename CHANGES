@@ -1,6 +1,9 @@
 Changes file for File::Backup
 
-0.06  Thu Sep 18 2003
+0.06.1 Sun Sep 21 2003
+    - Fixed up documentation a bit.  No functional changes made.
+
+0.06  Sun Sep 21 2003
     - Implemented file locking for the "from directory" source files.
     - Added skip blocks for people (like certain cpantesters) who do
       not have the tar or gzip files.

@@ -1,13 +1,12 @@
-# $Id: Backup.pm,v 1.21 2003/09/22 00:58:19 gene Exp $
+# $Id: Backup.pm,v 1.22 2003/09/22 01:49:00 gene Exp $
 
 package File::Backup;
-
 use strict;
 use Carp;
-use vars qw($VERSION @EXPORT_OK @EXPORT);
+use vars qw($VERSION); $VERSION = '0.06.1';
 use base qw(Exporter);
+use vars qw(@EXPORT_OK @EXPORT);
 @EXPORT = @EXPORT_OK = qw(backup);
-$VERSION = '0.06';
 
 use Cwd;
 use File::Which;
@@ -259,7 +258,8 @@ your computer is okay with that... Cross platform file backing is
 going to be implemented soon.
 
 A really nice feature of this new version is the use of C<File::Which> 
-to find your local version of tar and gzip.
+to find your local version of tar and gzip.  Additionally, automatic
+file locking ala C<LockFile::Simple> is implemented now.
 
 One very cool thing is that you can now supply the C<backup> function 
 with an arbitrary timestamp format string.
@@ -289,6 +289,10 @@ values, respectively.
 The function arguments are described below.
 
 =over 4
+
+=item * debug => 0 | 1
+
+Turn on verbose processing.  Defaults to zero (off).
 
 =item * from => $PATH
 
@@ -327,24 +331,28 @@ combination of the following in order:
 How about some examples:
 
 'YYYY-MM-DD_hh-mm-ss' is seen by C<sprintf> as
-'%4d-%02d-%02d_%02d-%02d-%02d'.  For September 11, 2003 at 8:23 and 
-47 seconds AM, that would be '2003-09-11_08-23-47'.
+'%4d-%02d-%02d_%02d-%02d-%02d'.  For Janurary 2, 2003 at 3:04 and 
+5 seconds AM, that would be '2003-01-02_03-04-05'.
 
-'YYMMDDhhmmss' would be '%02d%02d%02d%02d%02d%02d' producing 
-'030911082347'. 
+You can leave off ending format characters.  'YYYYMMDD' would be 
+'%04d%02d%02d' producing '20030102'.
 
-You can leave off format ending format characters to.  So 'YYMMDD' 
-would be '%02d%02d%02d' producing '20030911'.
+Note that this module always uses a four digit numeral for the year,
+so 'Y-MMDD' will produce '2003-0102'. 
 
 This "reverse date" scheme is used to unambiguously sort the backup 
 files chronologially.  That is, the stamp must be in order of largest 
-timescale maginitude.  Of course, you can producing an ambiguous stamp
-with 'YMD-hms', which would be '%01d%01d%01d-%01d%01d%01d' producing 
-'2003911-82347'.
+timescale maginitude.  Of course, you can produce an ambiguous stamp
+with 'YMDhms' which would produce '200312345'.  Is this December 3rd,
+2003?  Who knows?
 
 =item * archive => 0 | 1
 
-Flag to archive (with tar/gz/zip) the backed-up files.  Default 1.
+Flag to archive the backed-up files.  Default 1.
+
+* This is not useful yet, but in a future version files will be able 
+to be stamped and copied to a backup directory without any bundled 
+archiving.
 
 =item * archiver => $PATH_TO_PROGRAM
 
@@ -378,6 +386,8 @@ The optional compression switches.
 =item * compress => 0 | 1
 
 Flag to turn archive compression off or on.
+
+* Currently, this only makes sense if the C<archive> flag is turned on.
 
 =item * files => \@FILENAMES
 
@@ -524,6 +534,8 @@ nicely.
 L<Cwd>
 
 L<File::Which>
+
+L<LockFile::Simple>
 
 =head1 THANK YOU
 
