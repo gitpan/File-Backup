@@ -1,11 +1,15 @@
 Changes file for File::Backup
 
-0.0602 Fri Sep 26 2003
-    - Replaced the "double dotted" version string with a proper
-      decimal number.
-    - Enhanced and fixed documentation a bit.
+0.07  Tue Mar 23 2004
+    - Updated POD.
+    - Implemented optional purge_first toggle.
+    - Implemented optional lock toggle.
+    - Made the purge RE match the entire backup file name.
+    - Made this backup any glob filenames.  Yes.  It was totally
+      broken with respect to this before and no one noticed (or said
+      anything) including me.
 
-0.06.1 Sun Sep 21 2003
+0.06.1  Sun Sep 21 2003
     - Fixed up documentation a bit.  No functional changes made.
 
 0.06  Sun Sep 21 2003
