@@ -1,13 +1,14 @@
-# $Id: Backup.pm,v 1.22 2003/09/22 01:49:00 gene Exp $
+# $Id: Backup.pm,v 1.24 2003/09/26 16:45:10 gene Exp $
 
 package File::Backup;
 use strict;
-use Carp;
-use vars qw($VERSION); $VERSION = '0.06.1';
-use base qw(Exporter);
-use vars qw(@EXPORT_OK @EXPORT);
-@EXPORT = @EXPORT_OK = qw(backup);
 
+use base qw(Exporter);
+use vars qw($VERSION @EXPORT_OK @EXPORT);
+@EXPORT = @EXPORT_OK = qw(backup);
+$VERSION = '0.0602';
+
+use Carp;
 use Cwd;
 use File::Which;
 use LockFile::Simple qw(lock unlock);
@@ -24,6 +25,7 @@ sub backup {  # {{{
 
 # TODO Implement these:
 #        files => [],    # List of files to backup.
+#        individual => 0,  # Archive files one at a time, not as a bundle.
 #        include => '',  # Regular expression of filenames to match.
 #        exclude => '',  # Regular expression of filenames to match.
 #        flatten => 0,   # Do not preserve the source directory tree.
@@ -282,9 +284,11 @@ and a destination directory, and puts a compressed archive file of the
 source directory files into the destination directory.
 
 Return a hash reference with the path of the source as key and the 
-name of the archive file as the value or the files that were backed-up 
-individually as the keys and the new, timestamped path names as their 
-values, respectively.
+name of the archive file as the value.
+
+* When the list of files to back is implemented (see C<TO DO>), these 
+files will be the keys and the new, timestamped path names of the 
+backed as their values.
 
 The function arguments are described below.
 
@@ -381,7 +385,8 @@ The compression program.  Default is your local gzip.
 
 =item * compress_flags => $COMMAND_SWITCHES
 
-The optional compression switches.
+The optional compression switches.  Default is off (i.e. set to 
+nothing).
 
 =item * compress => 0 | 1
 

@@ -1,5 +1,10 @@
 Changes file for File::Backup
 
+0.0602 Fri Sep 26 2003
+    - Replaced the "double dotted" version string with a proper
+      decimal number.
+    - Enhanced and fixed documentation a bit.
+
 0.06.1 Sun Sep 21 2003
     - Fixed up documentation a bit.  No functional changes made.
 

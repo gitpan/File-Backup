@@ -19,7 +19,7 @@ SKIP: {
 
     # Just archive
     my $backed = backup(
-#        debug => 1,
+    #    debug => 1,
         compress => 0,
         from => $from_dir,
         to   => $to_dir,
@@ -37,7 +37,7 @@ SKIP: {
     skip "Can't find your gzip program", 1 unless $comp_prog && $arch_prog;
 
     $backed = backup(
-#        debug => 1,
+    #    debug => 1,
         from => $from_dir,
         to   => $to_dir,
         keep => $keep,
@@ -50,7 +50,7 @@ SKIP: {
     sleep 1;
 
     $backed = backup(
-#        debug => 1,
+    #    debug => 1,
         from => $from_dir,
         to   => $to_dir,
         keep => $keep,
@@ -64,7 +64,7 @@ SKIP: {
 
     # Keep all backups.
     $backed = backup(
-#        debug => 1,
+    #    debug => 1,
         from => $from_dir,
         to   => $to_dir,
         keep => -1,
@@ -78,7 +78,7 @@ SKIP: {
 
     # No keep: Why anyone would want to do this, I'm not sure.
     $backed = backup(
-#        debug => 1,
+    #    debug => 1,
         from => $from_dir,
         to   => $to_dir,
         keep => 0,
