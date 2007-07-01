@@ -3,9 +3,6 @@ WriteMakefile(
     NAME         => 'File::Backup',
     VERSION_FROM => 'lib/File/Backup.pm',
     PREREQ_PM    => {
-        'Test::More' => 0,
-        'Carp' => 0,
-        'Cwd' => 0,
         'File::Which' => 0,
         'LockFile::Simple' => 0,
     },

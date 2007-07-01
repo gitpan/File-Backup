@@ -1,5 +1,8 @@
 Changes file for File::Backup
 
+0.07_1 Sat June 30, 2007
+    - Moth-balled.  Retired. "Too generic to be useful."
+
 0.07  Tue Mar 23 2004
     - Updated POD.
     - Implemented optional purge_first toggle.
